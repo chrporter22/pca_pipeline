@@ -1,0 +1,17 @@
+node_modules
+build
+dist
+*.log
+*.env
+*.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env/
+.git
+.gitignore
+Dockerfile*
+docker-compose*.yml
+
