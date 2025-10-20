@@ -1,6 +1,8 @@
 # Light weight PCA Cohort Drift Detection Pipeline
 
-# Light weight PCA Cohort Drift Detection Pipeline
+API connection, Python + Bash ML engine, cache layer, React + Tailwind CSS UI, Node.js
+(Express) + Nginx reverse proxy, Docker + Raspberry Pi 5 (aarch64 ARM + linux-rpi)
+orchestration and hosting.
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Bash](https://img.shields.io/badge/bash_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
@@ -12,24 +14,6 @@
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![Arch Linux](https://img.shields.io/badge/archlinux-%230179DF.svg?style=for-the-badge&logo=arch-linux&logoColor=white)
-
-API connection, Python + Bash ML engine, cache layer, React + Tailwind CSS UI, Node.js
-(Express) + Nginx reverse proxy, Docker + Raspberry Pi 5 (aarch64 ARM + linux-rpi)
-orchestration and hosting.
-
-flowchart TD
-    API[API Connection]
-    subgraph ML_Engine
-      Python[Python]
-      Bash[Bash Scripts]
-    end
-    Cache[Cache Layer]
-    UI[React + Tailwind CSS UI]
-    Backend[Node.js (Express)]
-    Proxy[Nginx Reverse Proxy]
-    Docker[Docker Orchestration]
-    Hardware[Raspberry Pi 5 (aarch64 ARM)]
-
     API --> ML_Engine
     ML_Engine --> Cache
     Cache --> UI
@@ -37,4 +21,6 @@ flowchart TD
     Backend --> Proxy
     Proxy --> Docker
     Docker --> Hardware
+
+![PCA Cohort Drift Pipeline](./pipeline.svg)
 
