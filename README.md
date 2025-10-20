@@ -1,9 +1,4 @@
 # Light weight PCA Cohort Drift Detection Pipeline
-
-API connection, Python + Bash ML engine, cache layer, React + Tailwind CSS UI, Node.js
-(Express) + Nginx reverse proxy, Docker + Raspberry Pi 5 (aarch64 ARM + linux-rpi)
-orchestration and hosting.
-
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Bash](https://img.shields.io/badge/bash_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
