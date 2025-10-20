@@ -14,13 +14,26 @@ orchestration and hosting.
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![Arch Linux](https://img.shields.io/badge/archlinux-%230179DF.svg?style=for-the-badge&logo=arch-linux&logoColor=white)
-    API --> ML_Engine
-    ML_Engine --> Cache
-    Cache --> UI
-    UI --> Backend
-    Backend --> Proxy
-    Proxy --> Docker
-    Docker --> Hardware
 
-![PCA Cohort Drift Pipeline](./pipeline.svg)
+[API Connection]
+      ↓
+[Data Ingestion]
+      ↓
+[ML Engine]
+  (Python + Bash)
+      ↓
+[Cache Layer]
+      ↓
+[UI Layer]
+  (React + Tailwind CSS)
+      ↓
+[Backend]
+(Node.js + Express)
+      ↓
+[Reverse Proxy]
+        (Nginx)
+      ↓
+[Containerization & Hosting]
+  (Docker + Raspberry Pi 5)
+  (aarch64 ARM + linux-rpi)
 
