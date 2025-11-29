@@ -1,20 +1,29 @@
 FROM python:3.11-slim
 
 # Set exact version and architecture
-ENV UV_VERSION="0.1.17"
+ENV UV_VERSION="0.9.9"
 ENV UV_ARCH="aarch64-unknown-linux-musl"
-ENV UV_FILENAME="uv-${UV_VERSION}-${UV_ARCH}.tar.gz"
+ENV UV_FILENAME="uv-${UV_ARCH}.tar.gz"
+
+# RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+#
+# # Install uv binary directly
+# RUN curl -L "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/${UV_FILENAME}" \
+#     -o /tmp/uv.tar.gz && \
+#     mkdir -p /tmp/uv && \
+#     tar -xzf /tmp/uv.tar.gz -C /tmp/uv && \
+#     mv /tmp/uv/bin/uv /usr/local/bin/uv && \
+#     chmod +x /usr/local/bin/uv && \
+#     rm -rf /tmp/uv /tmp/uv.tar.gz
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Install uv binary directly
-RUN curl -L "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/${UV_FILENAME}" \
-    -o /tmp/uv.tar.gz && \
-    mkdir -p /tmp/uv && \
-    tar -xzf /tmp/uv.tar.gz -C /tmp/uv && \
-    mv /tmp/uv/uv /usr/local/bin/uv && \
-    chmod +x /usr/local/bin/uv && \
-    rm -rf /tmp/uv /tmp/uv.tar.gz
+RUN curl -4 --retry 5 --retry-delay 3 --fail -L \
+    "https://astral.sh/uv/install.sh" \
+    | sh
+
+ENV PATH="/root/.local/bin:${PATH}"
+
 
 # Confirm uv works
 RUN which uv && uv --version
@@ -30,8 +39,7 @@ COPY ml.py .
 COPY run.sh .
 
 # Create venv and install requirements
-RUN uv venv .venv && \
-    .venv/bin/uv pip install -r requirements.lock.txt
+RUN uv venv .venv && uv pip install -r requirements.lock.txt
 
 RUN chmod +x ./run.sh
 

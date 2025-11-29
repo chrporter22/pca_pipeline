@@ -6,6 +6,8 @@ import time
 from sklearn.preprocessing import LabelEncoder
 import redis
 import json
+import os
+import redis
 
 # Binance US API endpoint
 BASE_URL = "https://api.binance.us/api/v3/klines"
@@ -169,7 +171,11 @@ print(processed_df.columns)
 print(processed_df.head(n=25))
 
 # Connect to Redis (adjust host/port/db as needed)
-r = redis.Redis(host='localhost', port=6379, db=0)
+
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 for _, row in processed_df.iterrows():
     key = f"pca:{row['symbol']}:{int(row['open_time'].timestamp())}"

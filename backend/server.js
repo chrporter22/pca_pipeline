@@ -7,7 +7,10 @@ const port = 3001;
 
 // Redis client
 const client = redis.createClient({ url: 'redis://redis:6379' });
-client.connect().catch(console.error);
+
+client.connect()
+  .then(() => console.log('Connected to Redis'))
+  .catch(err => console.error('Redis connection error:', err));
 
 app.use(cors());
 
