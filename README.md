@@ -11,9 +11,9 @@
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![Arch Linux](https://img.shields.io/badge/archlinux-%230179DF.svg?style=for-the-badge&logo=arch-linux&logoColor=white)
 
-## Why Raspberry Pi 5?
+## Raspberry Pi 5
 
-The Pi 5 (ARM64 Arch Linux) is ideal due to:
+The Pi 5 (ARM aarch64 linux-rpi) is ideal due to:
 + Low power usage
 + NVMe speed
 + Docker performance
@@ -22,33 +22,35 @@ The Pi 5 (ARM64 Arch Linux) is ideal due to:
 + Passive cooling possible with ML workloads
 
 A high-performance, containerized, real-time PCA drift-detection system running end-to-end on a Raspberry Pi 5 (Arch ARM).
-The platform ingests live Binance data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
+The platform ingests live data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
 
 ## Future Extensions
 + PCA drift alerting
 + Statistical tests (KL divergence, JS divergence)
 + Multi-asset PCA overlays
 + GPU pipeline for Jetson boards
-+ On-device model training (autoencoders, VAEs)
++ On-device model training (autoencoders, multi-nominal log regression probability
+  predictions)
 
 ## Dynamic PCA Drift-Detection
 The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
 + Cycling between PCA components (PC1 → PC5)
++ Eigen Decomposition and Co-variance analysis via NumPy 
 
-### You can dynamically switch which PCA axes are plotted (PC1 vs PC2, PC2 vs PC3, … PC4 vs PC5), enabling:
+### Dynamically switch which PCA axes, enabling:
 + Cohort drift detection
-+ Trend analysis over tme
++ Trend analysis over time
 + Cluster spread/shift visualization
 + Outlier movement tracking
 + Market regime change detection (crypto volatility)
 + Live updates
 
-### As the ML pipeline writes new PCA points to Redis, the UI fetches and re-renders the scatter plot in real time.
+### ML pipeline writes new PCA points to Redis, UI fetches and re-renders real time.
 + Tailwind + React for minimal overhead
 + Optimized for low-latency rendering even on the Pi 5.
 
 ## Production Setup Included
-This repository includes a complete production-ready Docker pipeline:
+Repository includes a complete production-ready Docker pipeline:
 + Production Features
 + Multi-stage Vite build (optimized static assets)
 + Nginx serving static content
