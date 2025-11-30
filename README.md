@@ -11,9 +11,9 @@
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![Arch Linux](https://img.shields.io/badge/archlinux-%230179DF.svg?style=for-the-badge&logo=arch-linux&logoColor=white)
 
-## Raspberry Pi 5
+## Raspberry Pi 5 Home Lab - Quant Research
 
-The Pi 5 (ARM aarch64 linux-rpi) is ideal due to:
+Pi 5 (ARM aarch64 linux-rpi) key framework features:
 + Low power usage
 + NVMe speed
 + Docker performance
