@@ -107,3 +107,71 @@ Repository includes a complete production-ready Docker pipeline:
      │ Raspberry Pi 5 + Docker │
      │ (Arch Linux ARM64)      │
      └─────────────────────────┘
+
+## Future Enhancements
+**Data & Feature Engineering Pipeline (PCA/Drift)**
+- Model Architecture (Multi-class / Single-layer Neural Net):
+- Training + Backtesting Framework (Python)
+- Real-time Pipeline (Rust ingestion → C++ ML inference → Redis ↔ Node/React UI)
+- UI / Monitoring (2D PCA Drift Plot + Prediction Dashboard)
+
+**Data & Feature Engineering Pipeline**
+- Historical Data
+- Pull 1 year of options + underlying data from your broker API or market data vendor.
+- OHLCV for underlying
+- Option chain data (bid/ask/strike/expiration/IV/greeks)
+- Risk-free rate (for reference)
+- Volume, Open Interest
+
+**Feature Set (14 features across 64 candles → 64×14 tensor)**
+- Mean-Reversion Features
+    + z-score of price deviation
+    + rolling mean / std
+    + half-life estimate
+
+- Price-Pairs Features
+    + price spread between underlying & synthetic future
+    + ratio spread
+    + cointegration residual
+    + Relative Risk Indexing
+    + volatility ratio vs market (VIX / symbol_vol)
+    + realized / implied vol ratio
+    + ATR normalized
+
+- Derived Option Features
+    + delta / gamma / theta / vega
+    + moneyness (spot – strike)
+    + time to expiry normalized
+    + PCA & Drift Detection Pipeline
+    + PCA on the first 5 components
+
+**Each 64×14 sample → flatten to 896 vector → normalize → PCA(5)**
+- Drift Detection
+    + Eigenvalue shifts
+    + Wasserstein distance on PCA embedding
+    + ADWIN or Kolmogorov drift tests
+    + Hotelling’s T² statistic on the 5-component space
+
+**Output**
+- 2D scatter of PCA component (PC1 vs PC2)
+- Drift score (0–1)
+- Flag on timestamps where drift > threshold
+
+**Neural Network Architecture (Multi-class Single-Layer NN)**
+You want inverse target bands [-1, 0, +1] representing:
+- -1: strong put probability (price drop)
+- 0: neutral / hold
+- +1: strong call probability (price rise)
+
+## System
+        Historical Data -------|
+                               |--> Python (Feature Gen + PCA + Training + Backtesting)
+Live Exchange → Rust Ingestion → Normalize → Redis (streams/pubsub)
+                                          |             
+                                          └→ C++ ML Inference (ONNX)
+                                                 |
+                                                 → Redis: model.predictions
+                                                             |
+                                                             → Node.js / Express → React UI (PCA drift plot, predictions)
+                                                             → Alerts / Logging
+
