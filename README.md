@@ -47,6 +47,19 @@ The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
 + Tailwind + React for minimal overhead
 + Optimized for low-latency rendering even on the Pi 5.
 
+## Production Setup Included
+This repository includes a complete production-ready Docker pipeline:
++ Production Features
++ Multi-stage Vite build (optimized static assets)
++ Nginx serving static content
++ Bounded caching & immutable /assets/*
++ Backend /api reverse proxy
++ Dedicated Nginx container
++ Redis healthchecks
++ Backend healthchecks
++ Optional cron-style ML schedule
++ Automatic rebuild on git pull
+
 ## Full System Architecture
      ┌─────────────────────────┐
      │              API        │
