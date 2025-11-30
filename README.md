@@ -11,37 +11,38 @@
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![Arch Linux](https://img.shields.io/badge/archlinux-%230179DF.svg?style=for-the-badge&logo=arch-linux&logoColor=white)
 
+## Why Raspberry Pi 5?
+
+The Pi 5 (ARM64 Arch Linux) is ideal due to:
++ Low power usage
++ NVMe speed
++ Docker performance
++ Home Lab
++ Enough CPU to run PCA algos in real time
++ Passive cooling possible with ML workloads
+
 A high-performance, containerized, real-time PCA drift-detection system running end-to-end on a Raspberry Pi 5 (Arch ARM).
 The platform ingests live Binance data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
 
 ## Dynamic PCA Drift-Detection
 The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
++ Cycling between PCA components (PC1 → PC5)
 
-Cycling between PCA components (PC1 → PC5)
+### You can dynamically switch which PCA axes are plotted (PC1 vs PC2, PC2 vs PC3, … PC4 vs PC5), enabling:
++ Cohort drift detection
++ Trend analysis over tme
++ Cluster spread/shift visualization
++ Outlier movement tracking
++ Market regime change detection (crypto volatility)
++ Live updates
 
-You can dynamically switch which PCA axes are plotted (PC1 vs PC2, PC2 vs PC3, … PC4 vs PC5), enabling:
-
-Cohort drift detection
-
-Trend analysis over time
-
-Cluster spread/shift visualization
-
-Outlier movement tracking
-
-Market regime change detection (crypto volatility)
-
-Live updates
-
-As the ML pipeline writes new PCA points to Redis, the UI fetches and re-renders the scatter plot in real time.
-
-Tailwind + React for minimal overhead
-
-Optimized for low-latency rendering even on the Pi 5.
+### As the ML pipeline writes new PCA points to Redis, the UI fetches and re-renders the scatter plot in real time.
++ Tailwind + React for minimal overhead
++ Optimized for low-latency rendering even on the Pi 5.
 
 ## Full System Architecture
      ┌─────────────────────────┐
-     │      Binance API        │
+     │              API        │
      └──────────────┬──────────┘
                     │
                     ▼
@@ -84,26 +85,3 @@ Optimized for low-latency rendering even on the Pi 5.
      │ Raspberry Pi 5 + Docker │
      │ (Arch Linux ARM64)      │
      └─────────────────────────┘
-
-<!-- [API Connection] -->
-<!--       ↓ -->
-<!-- [Data Ingestion] -->
-<!--       ↓ -->
-<!-- [ML Engine] -->
-<!--   (Python + Bash) -->
-<!--       ↓ -->
-<!-- [Cache Layer] -->
-<!--       ↓ -->
-<!-- [UI Layer] -->
-<!--   (React + Tailwind CSS) -->
-<!--       ↓ -->
-<!-- [Backend] -->
-<!-- (Node.js + Express) -->
-<!--       ↓ -->
-<!-- [Reverse Proxy] -->
-<!--         (Nginx) -->
-<!--       ↓ -->
-<!-- [Containerization & Hosting] -->
-<!--   (Docker + Raspberry Pi 5) -->
-<!--   (aarch64 ARM + linux-rpi) -->
-<!---->
