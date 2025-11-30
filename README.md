@@ -24,6 +24,13 @@ The Pi 5 (ARM64 Arch Linux) is ideal due to:
 A high-performance, containerized, real-time PCA drift-detection system running end-to-end on a Raspberry Pi 5 (Arch ARM).
 The platform ingests live Binance data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
 
+## Future Extensions
++ PCA drift alerting
++ Statistical tests (KL divergence, JS divergence)
++ Multi-asset PCA overlays
++ GPU pipeline for Jetson boards
++ On-device model training (autoencoders, VAEs)
+
 ## Dynamic PCA Drift-Detection
 The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
 + Cycling between PCA components (PC1 → PC5)
