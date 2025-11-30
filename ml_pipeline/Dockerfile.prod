@@ -1,0 +1,44 @@
+# ml_pipeline/Dockerfile.prod
+FROM python:3.11-slim
+
+# Set exact version and architecture for uv
+ENV UV_VERSION="0.9.9"
+ENV UV_ARCH="aarch64-unknown-linux-musl"
+ENV UV_FILENAME="uv-${UV_ARCH}.tar.gz"
+
+# Install curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Install uv via Astral's install script
+RUN curl -4 --retry 5 --retry-delay 3 --fail -L \
+    "https://astral.sh/uv/install.sh" \
+    | sh
+
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Confirm uv works
+RUN which uv && uv --version
+
+# Set working directory
+WORKDIR /app
+
+# Copy only dependencies first (for Docker caching)
+COPY requirements.txt .
+
+# Compile requirements.lock.txt using uv
+RUN uv pip compile requirements.txt --output-file requirements.lock.txt
+
+# Copy the rest of the application
+COPY ml.py .
+COPY run.sh .
+
+# Create virtual environment and install requirements
+RUN uv venv .venv && uv pip install -r requirements.lock.txt
+
+# Make run.sh executable
+RUN chmod +x ./run.sh
+
+# Default command
+CMD ["./run.sh"]
+
+
