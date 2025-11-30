@@ -115,9 +115,9 @@ Repository includes a complete production-ready Docker pipeline:
 - Real-time Pipeline (Rust ingestion → C++ ML inference → Redis ↔ Node/React UI)
 - UI / Monitoring (2D PCA Drift Plot + Prediction Dashboard)
 
-**Data & Feature Engineering Pipeline**
+**Back Testing Data & Feature Engineering Pipeline**
 - Historical Data
-- Pull 1 year of options + underlying data from your broker API or market data vendor.
+- Pull 1 year of options + underlying data from API 
 - OHLCV for underlying
 - Option chain data (bid/ask/strike/expiration/IV/greeks)
 - Risk-free rate (for reference)
@@ -164,9 +164,10 @@ You want inverse target bands [-1, 0, +1] representing:
 - +1: strong call probability (price rise)
 
 ## System
+
         Historical Data -------|
                                |--> Python (Feature Gen + PCA + Training + Backtesting)
-Live Exchange → Rust Ingestion → Normalize → Redis (streams/pubsub)
+    Live Exchange → Rust Ingestion → Normalize → Redis (streams/pubsub)
                                           |             
                                           └→ C++ ML Inference (ONNX)
                                                  |
