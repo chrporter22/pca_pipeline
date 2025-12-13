@@ -12,8 +12,7 @@
 ![Arch Linux](https://img.shields.io/badge/archlinux-%230179DF.svg?style=for-the-badge&logo=arch-linux&logoColor=white)
 
 ## Raspberry Pi 5 Home Lab - Quant Research
-
-Pi 5 (ARM aarch64 linux-rpi) key framework features:
+**Pi 5 (ARM aarch64 linux-rpi) key framework features:**
 + Low power usage
 + NVMe speed
 + Docker performance
@@ -25,13 +24,6 @@ A high-performance, containerized, real-time PCA drift-detection system running 
 The platform ingests live data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
 
 ![Screenshot](/image.png)
-## Future Extensions
-+ PCA drift alerting
-+ Statistical tests (KL divergence, JS divergence)
-+ Multi-asset PCA overlays
-+ GPU pipeline for Jetson boards
-+ On-device model training (autoencoders, multi-nominal log regression probability
-  predictions)
 
 ## Dynamic PCA Drift-Detection
 The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
@@ -57,7 +49,6 @@ Repository includes a complete production-ready Docker pipeline:
 + Nginx serving static content
 + Bounded caching & immutable /assets/*
 + Backend /api reverse proxy
-+ Dedicated Nginx container
 + Redis healthchecks
 + Backend healthchecks
 + Optional cron-style ML schedule
@@ -71,13 +62,13 @@ Repository includes a complete production-ready Docker pipeline:
                     ▼
      ┌─────────────────────────┐
      │     Data Ingestion      │
-     │ (Python + asyncio)      │
+     │          (asyncio)      │
      └──────────────┬──────────┘
                     │
                     ▼
      ┌─────────────────────────┐
      │     ML Engine (PCA)     │
-     │  Python + sklearn       │
+     │  Python + NumPy         │
      └──────────────┬──────────┘
                     │ writes pca:* keys
                     ▼
@@ -112,13 +103,20 @@ Repository includes a complete production-ready Docker pipeline:
 ## Future Enhancements
 **Data & Feature Engineering Pipeline (PCA/Drift)**
 - Model Architecture (Multi-class / Single-layer Neural Net):
-- Training + Backtesting Framework (Python)
+- Training + Back-testing Framework (Python)
 - Real-time Pipeline (Rust ingestion → C++ ML inference → Redis ↔ Node/React UI)
 - UI / Monitoring (2D PCA Drift Plot + Prediction Dashboard)
 
+**Dimension Reduction Algo**
++ PCA drift alerting
++ Statistical tests (KL divergence, JS divergence)
++ Multi-asset PCA overlays
++ On-device model training (autoencoders, multi-nominal log regression probability
+  predictions)
+
 **Back Testing Data & Feature Engineering Pipeline**
 - Historical Data
-- Pull 1 year of options + underlying data from API 
+- 1 year of options + underlying data from API 
 - OHLCV for underlying
 - Option chain data (bid/ask/strike/expiration/IV/greeks)
 - Risk-free rate (for reference)
@@ -134,7 +132,8 @@ Repository includes a complete production-ready Docker pipeline:
     + price spread between underlying & synthetic future
     + ratio spread
     + cointegration residual
-    + Relative Risk Indexing
+
++ Relative Risk Indexing
     + volatility ratio vs market (VIX / symbol_vol)
     + realized / implied vol ratio
     + ATR normalized
@@ -143,12 +142,11 @@ Repository includes a complete production-ready Docker pipeline:
     + delta / gamma / theta / vega
     + moneyness (spot – strike)
     + time to expiry normalized
-    + PCA & Drift Detection Pipeline
-    + PCA on the first 5 components
 
 **Each 64×14 sample → flatten to 896 vector → normalize → PCA(5)**
 - Drift Detection
     + Eigenvalue shifts
+    + PCA on the first 5 components
     + Wasserstein distance on PCA embedding
     + ADWIN or Kolmogorov drift tests
     + Hotelling’s T² statistic on the 5-component space
