@@ -20,17 +20,17 @@
 + Enough CPU to run PCA algos in real time
 + Passive cooling possible with ML workloads
 
-A high-performance, containerized, real-time PCA drift-detection system running end-to-end on a Raspberry Pi 5 (Arch ARM).
-The platform ingests live data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
+High-performance, containerized, real-time PCA drift-detection running end-to-end on a Raspberry Pi 5 (Arch ARM).
+Live data ingestion, scalable PCA dimensionality reduction, Redis cache layer, and interactive UI for analyzing PCA drift across components.
 
 ![Screenshot](/image.png)
 
 ## Dynamic PCA Drift-Detection
-The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
+Frontend PCA visualiztions via interactive 2D scatter plot, allowing:
 + Cycling between PCA components (PC1 → PC5)
 + Eigen Decomposition and Co-variance analysis via NumPy 
 
-### Dynamically switch which PCA axes, enabling:
+### Dynamically switch PCA axes, enabling:
 + Cohort drift detection
 + Trend analysis over time
 + Cluster spread/shift visualization
@@ -43,7 +43,7 @@ The frontend visualizes PCA output in an interactive 2D scatter plot, allowing:
 + Optimized for low-latency rendering even on the Pi 5.
 
 ## Production Setup Included
-Repository includes a complete production-ready Docker pipeline:
+Complete production-ready Docker pipeline:
 + Production Features
 + Multi-stage Vite build (optimized static assets)
 + Nginx serving static content
@@ -165,7 +165,7 @@ Inverse target bands [-1, 0, +1] representing:
 ## System
 
         Historical Data -------|
-                               |--> Python (Feature Gen + PCA + Training + Backtesting)
+                               |--> Python (Feature Gen + PCA + Training + Back-testing)
     Live Exchange → Rust Ingestion → Normalize → Redis (streams/pubsub)
                                           |             
                                           └→ C++ ML Inference (ONNX)
