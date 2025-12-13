@@ -159,7 +159,7 @@ Repository includes a complete production-ready Docker pipeline:
 - Flag on timestamps where drift > threshold
 
 **Neural Network Architecture (Multi-class Single-Layer NN)**
-You want inverse target bands [-1, 0, +1] representing:
+Inverse target bands [-1, 0, +1] representing:
 - -1: strong put probability (price drop)
 - 0: neutral / hold
 - +1: strong call probability (price rise)
