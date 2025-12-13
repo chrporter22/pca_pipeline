@@ -24,6 +24,7 @@ Pi 5 (ARM aarch64 linux-rpi) key framework features:
 A high-performance, containerized, real-time PCA drift-detection system running end-to-end on a Raspberry Pi 5 (Arch ARM).
 The platform ingests live data, performs scalable PCA dimensionality reduction, caches results in Redis, and exposes an interactive UI for analyzing PCA drift across components.
 
+![Screenshot](/image.png)
 ## Future Extensions
 + PCA drift alerting
 + Statistical tests (KL divergence, JS divergence)
