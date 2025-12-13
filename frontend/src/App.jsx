@@ -83,7 +83,7 @@ export default function App() {
       }}
     >
       <h1 className="text-3xl mb-6 text-cyan-300">
-        🐋 PCA Market Structure (Redis → ML → Web)
+        PCA Market Structure (Redis → ML → Web)
       </h1>
 
       <div className="mb-4 flex gap-6">
@@ -229,4 +229,3 @@ export default function App() {
     </div>
   );
 }
-
