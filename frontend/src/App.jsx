@@ -26,6 +26,7 @@ export default function App() {
   const [data, setData] = useState([]);
   const [compX, setCompX] = useState(1);
   const [compY, setCompY] = useState(2);
+  const [hover, setHover] = useState(null);
 
   useEffect(() => {
     fetch('/api/pca')
@@ -44,9 +45,9 @@ export default function App() {
   const stats = useMemo(() => {
     const pts = data
       .map(d => ({
+        ...d,
         x: d[`pca_${compX}`],
         y: d[`pca_${compY}`],
-        timestamp: d.timestamp,
       }))
       .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
 
@@ -69,7 +70,7 @@ export default function App() {
   }, [data, compX, compY]);
 
   const range = (a, b) => (b - a === 0 ? 1 : b - a);
-  const fmt = v => v.toFixed(2);
+  const fmt = v => Number(v).toFixed(2);
 
   return (
     <div
@@ -119,38 +120,12 @@ export default function App() {
 
             return (
               <g key={i}>
-                <line
-                  x1={x}
-                  y1={margin}
-                  x2={x}
-                  y2={height - margin}
-                  stroke="#94a3b8"
-                  strokeOpacity="0.25"
-                />
-                <line
-                  x1={margin}
-                  y1={y}
-                  x2={width - margin}
-                  y2={y}
-                  stroke="#94a3b8"
-                  strokeOpacity="0.25"
-                />
-                <text
-                  x={x}
-                  y={height - margin + 18}
-                  fill="#94a3b8"
-                  fontSize="10"
-                  textAnchor="middle"
-                >
+                <line x1={x} y1={margin} x2={x} y2={height - margin} stroke="#94a3b8" strokeOpacity="0.25" />
+                <line x1={margin} y1={y} x2={width - margin} y2={y} stroke="#94a3b8" strokeOpacity="0.25" />
+                <text x={x} y={height - margin + 18} fill="#94a3b8" fontSize="10" textAnchor="middle">
                   {fmt(xv)}
                 </text>
-                <text
-                  x={margin - 10}
-                  y={y + 4}
-                  fill="#94a3b8"
-                  fontSize="10"
-                  textAnchor="end"
-                >
+                <text x={margin - 10} y={y + 4} fill="#94a3b8" fontSize="10" textAnchor="end">
                   {fmt(yv)}
                 </text>
               </g>
@@ -194,11 +169,55 @@ export default function App() {
                 key={i}
                 cx={x}
                 cy={y}
-                r="3"
+                r={p.zscore_volume > 3 ? 5 : 3}
                 fill={viridisColor(t)}
+                stroke={p.volume_flag ? '#f87171' : 'none'}
+                strokeWidth="1.5"
+                style={{ pointerEvents: 'all', cursor: 'crosshair' }}
+                onMouseEnter={() => setHover({ x, y, p })}
+                onMouseLeave={() => setHover(null)}
               />
             );
           })}
+
+        {/* Tooltip */}
+        {hover && (
+          <g pointerEvents="none">
+            <rect
+              x={hover.x + 10}
+              y={hover.y - 118}
+              width="260"
+              height="112"
+              rx="6"
+              fill="#020617"
+              stroke="#38bdf8"
+              strokeOpacity="0.8"
+            />
+            <text x={hover.x + 20} y={hover.y - 96} fill="#7dd3fc" fontSize="11">
+              PC{compX}: {fmt(hover.p[`pca_${compX}`])}
+            </text>
+            <text x={hover.x + 20} y={hover.y - 84} fill="#7dd3fc" fontSize="11">
+              PC{compY}: {fmt(hover.p[`pca_${compY}`])}
+            </text>
+            <text x={hover.x + 20} y={hover.y - 66} fill="#cbd5e1" fontSize="11">
+              O:{hover.p.open} H:{hover.p.high}
+            </text>
+            <text x={hover.x + 20} y={hover.y - 54} fill="#cbd5e1" fontSize="11">
+              L:{hover.p.low} C:{hover.p.close}
+            </text>
+            <text
+              x={hover.x + 20}
+              y={hover.y - 36}
+              fill={hover.p.zscore_volume > 3 ? '#f87171' : '#94a3b8'}
+              fontSize="11"
+            >
+              Vol: {hover.p.volume} | Z: {hover.p.zscore_volume.toFixed(2)}
+            </text>
+            <text x={hover.x + 20} y={hover.y - 20} fill="#64748b" fontSize="10">
+              {new Date(hover.p.timestamp * 1000).toLocaleString()}
+            </text>
+          </g>
+        )}
 
         {/* Date stamp */}
         {stats?.latestTs && (
@@ -209,7 +228,6 @@ export default function App() {
               width="260"
               height="28"
               rx="6"
-              ry="6"
               fill="#020617"
               stroke="#38bdf8"
               strokeOpacity="0.6"
@@ -229,3 +247,4 @@ export default function App() {
     </div>
   );
 }
+
