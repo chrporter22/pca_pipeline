@@ -95,7 +95,7 @@ export default function App() {
       }}
     >
       <h1 className="text-3xl mb-4 text-cyan-300">
-        PCA Market Structure Explorer
+        PCA Cohort Drift Detection Dashboard
       </h1>
 
       {/* Component selectors styled like timestamp */}
@@ -290,17 +290,16 @@ export default function App() {
             border: '1px solid rgba(148,163,184,0.5)',
           }}
         >
-          <h2 className="text-cyan-300 text-lg mb-2">Key Features</h2>
+          <h2 className="text-cyan-300 text-lg mb-2">Key Plotting Features</h2>
           <ul className="text-sm text-slate-300 space-y-2 leading-relaxed">
-            <li><span className="text-cyan-400">PCA:</span> Market regime projection</li>
-            <li><span className="text-cyan-400">Anomalies:</span> Volume z-score alerts</li>
-            <li><span className="text-cyan-400">Encoding:</span> Color = magnitude</li>
-            <li><span className="text-cyan-400">Pipeline:</span> Redis → ML → React</li>
-            <li><span className="text-cyan-400">Interaction:</span> Hover inspection</li>
+            <li><span className="text-cyan-400">PCA:</span> Market Regime Projection</li>
+            <li><span className="text-cyan-400">Anomalies:</span> Volume Z-score Alerts</li>
+            <li><span className="text-cyan-400">Encoding:</span> Color = Magnitude</li>
+            <li><span className="text-cyan-400">Pipeline:</span> API → ML → Redis → React UI Dashboard</li>
+            <li><span className="text-cyan-400">Interaction:</span> Tool Tip Hover Inspection</li>
           </ul>
         </div>
       </div>
     </div>
   );
 }
-

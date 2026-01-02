@@ -16,7 +16,7 @@ BASE_URL = "https://api.binance.us/api/v3/klines"
 symbols = ["BTCUSDT", "SOLUSDT", "ETHUSDT"]
 interval = "1m"
 limit = 5000
-LOOP_SLEEP_SECONDS = 60  # run once per minute
+LOOP_SLEEP_SECONDS =  60 # run once per minute
 
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
