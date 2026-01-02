@@ -23,7 +23,7 @@
 High-performance, containerized, real-time PCA drift-detection running end-to-end on a Raspberry Pi 5 (Arch ARM).
 Live data ingestion, scalable PCA dimensionality reduction, Redis cache layer, and interactive UI for analyzing PCA drift across components.
 
-![Screenshot](/image2.png)
+![Screenshot](/image3.png)
 
 ## Dynamic PCA Drift-Detection
 Frontend PCA visualiztions via interactive 2D scatter plot, allowing:
