@@ -7,20 +7,19 @@ from sklearn.preprocessing import LabelEncoder
 import redis
 import json
 import os
-import time
 
 # =========================
 # CONFIG
 # =========================
 BASE_URL = "https://api.binance.us/api/v3/klines"
-symbols = ["BTCUSDT", "SOLUSDT", "ETHUSDT"]
+symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
 interval = "1m"
 limit = 5000
-LOOP_SLEEP_SECONDS =  60 # run once per minute
+LOOP_SLEEP_SECONDS = 60
 
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_MAX_ITEMS = 1000
+REDIS_MAX_ITEMS = 1500
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
@@ -57,28 +56,52 @@ def add_zscore_and_flag(df):
     )
     return df
 
+# =========================
+# PREPROCESS (SCHEMA SAFE)
+# =========================
 def preprocess_for_pca(df):
     df = df.copy()
+
+    # preserve frontend-safe symbol
+    df["symbol_str"] = df["symbol"].astype(str)
+
+    # timestamp
     df["timestamp"] = df["open_time"].astype(np.int64) // 10**9
 
-    for col in ["symbol", "volume_flag"]:
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
+    # encode symbol (KEEP numeric field name = symbol)
+    symbol_le = LabelEncoder()
+    df["symbol"] = symbol_le.fit_transform(df["symbol_str"])
 
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    # encode volume_flag (KEEP numeric)
+    flag_le = LabelEncoder()
+    df["volume_flag"] = flag_le.fit_transform(df["volume_flag"].astype(str))
+
+    numeric_cols = [
+        "symbol",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "timestamp",
+        "zscore_volume",
+        "volume_flag",
+    ]
+
     X = df[numeric_cols].dropna()
-
     return X, df.loc[X.index]
 
+# =========================
+# PCA
+# =========================
 def compute_pca_from_scratch(X, n_components=5):
     X = np.asarray(X)
     X_centered = X - np.mean(X, axis=0)
-    cov_matrix = np.cov(X_centered, rowvar=False)
-    eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+    cov = np.cov(X_centered, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eigh(cov)
     idx = np.argsort(eigenvalues)[::-1]
     components = eigenvectors[:, idx][:, :n_components]
-    X_pca = X_centered @ components
-    return X_pca
+    return X_centered @ components
 
 def append_pca_components(df, X_pca):
     for i in range(X_pca.shape[1]):
@@ -86,14 +109,14 @@ def append_pca_components(df, X_pca):
     return df
 
 # =========================
-# REDIS WRITE (1000 MAX)
+# REDIS WRITE (1500 MAX)
 # =========================
 def write_to_redis(df):
     pipe = r.pipeline(transaction=False)
 
     for _, row in df.iterrows():
         ts = int(row["open_time"].timestamp())
-        key = f"pca:{row['symbol']}"
+        key = f"pca:{row['symbol_str']}"
 
         payload = {}
         for k, v in row.to_dict().items():
@@ -116,14 +139,16 @@ async def main_loop():
     async with aiohttp.ClientSession() as session:
         while True:
             try:
-                tasks = [fetch_klines(session, s) for s in symbols]
-                dfs = await asyncio.gather(*tasks)
+                dfs = await asyncio.gather(
+                    *[fetch_klines(session, s) for s in symbols]
+                )
 
                 all_data = pd.concat(dfs, ignore_index=True)
+
                 all_data = (
                     all_data
                     .groupby("symbol")
-                    .apply(lambda x: x.sort_values("open_time").tail(5000))
+                    .apply(lambda x: x.sort_values("open_time").tail(limit))
                     .reset_index(drop=True)
                 )
 
@@ -137,19 +162,29 @@ async def main_loop():
                 all_data = all_data[all_data["volume_flag"] == "above"]
 
                 if len(all_data) < 2:
-                    print("Not enough data for PCA, skipping iteration")
                     await asyncio.sleep(LOOP_SLEEP_SECONDS)
                     continue
 
                 X, processed_df = preprocess_for_pca(all_data)
-                X = X[["symbol", "open", "timestamp", "volume_flag", "zscore_volume"]]
 
-                X_pca = compute_pca_from_scratch(X.to_numpy(), n_components=5)
+                X_pca = compute_pca_from_scratch(
+                    X[
+                        [
+                            "symbol",
+                            "open",
+                            "timestamp",
+                            "volume_flag",
+                            "zscore_volume",
+                        ]
+                    ].to_numpy(),
+                    n_components=5,
+                )
+
                 processed_df = append_pca_components(processed_df, X_pca)
 
                 write_to_redis(processed_df)
 
-                print(f"[{datetime.utcnow().isoformat()}] Updated Redis")
+                print(f"[{datetime.utcnow().isoformat()}] Redis updated")
 
             except Exception as e:
                 print("Loop error:", e)
@@ -161,4 +196,3 @@ async def main_loop():
 # =========================
 if __name__ == "__main__":
     asyncio.run(main_loop())
-
