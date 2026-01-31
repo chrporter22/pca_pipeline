@@ -92,7 +92,7 @@ export default function App() {
   const range = (a, b) => (b - a === 0 ? 1 : b - a);
   const fmt = v => Number(v).toFixed(2);
 
-  const tooltipPos = (x, y, w = 260, h = 156) => {
+  const tooltipPos = (x, y, w = 260, h = 176) => {
     const pad = 8;
     return {
       left: x + w + pad > width ? x - w - pad : x + pad,
@@ -167,7 +167,7 @@ export default function App() {
               );
             })}
 
-          {/* Tooltip with gauge */}
+          {/* Tooltip */}
           {hover && stats && (() => {
             const { left, top } = tooltipPos(hover.x, hover.y);
             const symbol = hover.p.symbol_str ?? 'UNKNOWN';
@@ -177,22 +177,15 @@ export default function App() {
 
             return (
               <g pointerEvents="none">
-                <rect x={left} y={top} width="260" height="156" rx="6" fill="#020617" stroke={color} />
+                <rect x={left} y={top} width="260" height="176" rx="6" fill="#020617" stroke={color} />
 
                 <text x={left + 10} y={top + 16} fill={color} fontSize="12" fontWeight="bold">
                   {symbol}
                 </text>
 
-                {/* Tooltip Gauge */}
+                {/* Gauge */}
                 <rect x={left + 10} y={top + 22} width="200" height="6" rx="3" fill="#0f172a" />
-                <rect
-                  x={left + 10}
-                  y={top + 22}
-                  width={200 * pct}
-                  height="6"
-                  rx="3"
-                  fill={color}
-                />
+                <rect x={left + 10} y={top + 22} width={200 * pct} height="6" rx="3" fill={color} />
                 <text x={left + 220} y={top + 28} fill="#94a3b8" fontSize="9">
                   {(pct * 100).toFixed(1)}%
                 </text>
@@ -203,13 +196,25 @@ export default function App() {
                 <text x={left + 10} y={top + 58} fill="#7dd3fc" fontSize="11">
                   PC{compY}: {fmt(hover.p[`pca_${compY}`])}
                 </text>
+
                 <text x={left + 10} y={top + 76} fill="#cbd5e1" fontSize="11">
                   O:{hover.p.open} H:{hover.p.high}
                 </text>
                 <text x={left + 10} y={top + 90} fill="#cbd5e1" fontSize="11">
                   L:{hover.p.low} C:{hover.p.close}
                 </text>
-                <text x={left + 10} y={top + 110} fill="#94a3b8" fontSize="10">
+
+                {/* Volume + Z-score (RESTORED) */}
+                <text
+                  x={left + 10}
+                  y={top + 108}
+                  fill={hover.p.zscore_volume > 3 ? '#f87171' : '#94a3b8'}
+                  fontSize="11"
+                >
+                  Vol: {hover.p.volume} | Z:{hover.p.zscore_volume.toFixed(2)}
+                </text>
+
+                <text x={left + 10} y={top + 128} fill="#94a3b8" fontSize="10">
                   {new Date(hover.p.timestamp * 1000).toLocaleString()}
                 </text>
               </g>
@@ -217,7 +222,7 @@ export default function App() {
           })()}
         </svg>
 
-        {/* Control Panel */}
+        {/* Control Panel (unchanged) */}
         <div className="w-[300px] space-y-4">
           <div className="p-4 rounded bg-[#020617] border border-slate-600">
             <div className="text-sm text-slate-400">Latest</div>
@@ -235,7 +240,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* PCA controls (unchanged) */}
           <div className="p-4 rounded bg-[#020617] border border-slate-600 space-y-3">
             {[
               ['X', compX, setCompX],
@@ -252,7 +256,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Symbol distribution gauge (panel) */}
           {stats && (
             <div className="p-4 rounded bg-[#020617] border border-slate-600">
               <div className="text-sm text-slate-400 mb-2">
