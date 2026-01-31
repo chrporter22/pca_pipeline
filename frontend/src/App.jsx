@@ -64,6 +64,8 @@ export default function App() {
 
     if (!pts.length) return null;
 
+    const volumes = pts.map(p => p.volume).sort((a, b) => a - b);
+
     const symbolCounts = {};
     pts.forEach(p => {
       symbolCounts[p.symbol_str] =
@@ -76,6 +78,7 @@ export default function App() {
 
     return {
       pts,
+      volumes,
       symbolCounts,
       total: pts.length,
       latestTs,
@@ -92,7 +95,12 @@ export default function App() {
   const range = (a, b) => (b - a === 0 ? 1 : b - a);
   const fmt = v => Number(v).toFixed(2);
 
-  const tooltipPos = (x, y, w = 260, h = 176) => {
+  const volumePct = (v, arr) => {
+    const idx = arr.findIndex(x => x >= v);
+    return idx === -1 ? 1 : idx / arr.length;
+  };
+
+  const tooltipPos = (x, y, w = 260, h = 210) => {
     const pad = 8;
     return {
       left: x + w + pad > width ? x - w - pad : x + pad,
@@ -150,20 +158,33 @@ export default function App() {
               const y = height - margin - ((p.y - stats.minY) / range(stats.minY, stats.maxY)) * plotH;
               const mag = Math.hypot(p.x, p.y);
               const t = (mag - stats.minM) / range(stats.minM, stats.maxM);
+              const vp = volumePct(p.volume, stats.volumes);
 
               return (
-                <circle
-                  key={i}
-                  cx={x}
-                  cy={y}
-                  r={p.zscore_volume > 3 ? 5 : 3}
-                  fill={viridisColor(t)}
-                  stroke={p.volume_flag ? '#f87171' : 'none'}
-                  strokeWidth="1.5"
-                  style={{ cursor: 'crosshair' }}
-                  onMouseEnter={() => setHover({ x, y, p })}
-                  onMouseLeave={() => setHover(null)}
-                />
+                <g key={i}>
+                  {p.zscore_volume > 3 && (
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={10}
+                      fill="none"
+                      stroke="#f87171"
+                      strokeOpacity="0.25"
+                    />
+                  )}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={p.zscore_volume > 3 ? 5 : 3}
+                    fill={viridisColor(t)}
+                    fillOpacity={0.4 + vp * 0.6}
+                    stroke={p.volume_flag ? '#f87171' : 'none'}
+                    strokeWidth="1.5"
+                    style={{ cursor: 'crosshair' }}
+                    onMouseEnter={() => setHover({ x, y, p })}
+                    onMouseLeave={() => setHover(null)}
+                  />
+                </g>
               );
             })}
 
@@ -174,16 +195,22 @@ export default function App() {
             const count = stats.symbolCounts[symbol] || 0;
             const pct = count / stats.total;
             const color = symbolColor(symbol);
+            const vp = volumePct(hover.p.volume, stats.volumes);
+
+            const spark = stats.pts
+              .filter(p => p.symbol_str === symbol)
+              .slice(-12)
+              .map(p => p.zscore_volume);
 
             return (
               <g pointerEvents="none">
-                <rect x={left} y={top} width="260" height="176" rx="6" fill="#020617" stroke={color} />
+                <rect x={left} y={top} width="260" height="210" rx="6" fill="#020617" stroke={color} />
 
                 <text x={left + 10} y={top + 16} fill={color} fontSize="12" fontWeight="bold">
                   {symbol}
                 </text>
 
-                {/* Gauge */}
+                {/* Symbol gauge */}
                 <rect x={left + 10} y={top + 22} width="200" height="6" rx="3" fill="#0f172a" />
                 <rect x={left + 10} y={top + 22} width={200 * pct} height="6" rx="3" fill={color} />
                 <text x={left + 220} y={top + 28} fill="#94a3b8" fontSize="9">
@@ -204,7 +231,6 @@ export default function App() {
                   L:{hover.p.low} C:{hover.p.close}
                 </text>
 
-                {/* Volume + Z-score (RESTORED) */}
                 <text
                   x={left + 10}
                   y={top + 108}
@@ -214,7 +240,19 @@ export default function App() {
                   Vol: {hover.p.volume} | Z:{hover.p.zscore_volume.toFixed(2)}
                 </text>
 
-                <text x={left + 10} y={top + 128} fill="#94a3b8" fontSize="10">
+                {/* Z-score sparkline */}
+                <polyline
+                  points={spark.map((v, i) => `${left + 10 + i * 16},${top + 140 - v * 4}`).join(' ')}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="1"
+                />
+
+                {/* Volume percentile bar */}
+                <rect x={left + 10} y={top + 186} width="200" height="6" rx="3" fill="#0f172a" />
+                <rect x={left + 10} y={top + 186} width={200 * vp} height="6" rx="3" fill={color} />
+
+                <text x={left + 10} y={top + 160} fill="#94a3b8" fontSize="10">
                   {new Date(hover.p.timestamp * 1000).toLocaleString()}
                 </text>
               </g>
@@ -222,7 +260,7 @@ export default function App() {
           })()}
         </svg>
 
-        {/* Control Panel (unchanged) */}
+        {/* Control Panel (UNCHANGED) */}
         <div className="w-[300px] space-y-4">
           <div className="p-4 rounded bg-[#020617] border border-slate-600">
             <div className="text-sm text-slate-400">Latest</div>
