@@ -146,7 +146,7 @@ rows = []
 for sym_id, sym in enumerate(SYMBOLS):
     for _, r in df.iterrows():
         rows.append({
-            "timestamp": r["timestamp"],
+            "timestamp": r.name,
             "symbol_id": sym_id,
             "target": curate_target(r, sym),
             "features": [
