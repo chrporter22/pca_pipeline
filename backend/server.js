@@ -36,7 +36,7 @@ app.get('/api/pca', async (req, res) => {
       const rows = await client.zRange(
         key,
         0,
-        999,
+        199,
         { REV: true }
       );
 
