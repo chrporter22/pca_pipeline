@@ -31,7 +31,7 @@ RUN uv pip compile requirements.txt --output-file requirements.lock.txt
 # Copy the rest of the application
 COPY ml.py .
 COPY run.sh .
-COPY training_initial.py .
+COPY initial_training.py .
 
 # Create virtual environment and install requirements
 RUN uv venv .venv && uv pip install -r requirements.lock.txt
