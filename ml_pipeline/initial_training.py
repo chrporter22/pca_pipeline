@@ -3,8 +3,6 @@ import redis
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 import random
 
@@ -30,8 +28,7 @@ RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
 
 N_RANDOM_SEARCH = 10
-
-MODEL_OUT = "pca_pair_regime_multisymbol_onehot_best.tflite"
+MODEL_OUT = "risk_model.tflite"
 
 # =========================
 # LOAD REDIS
@@ -114,8 +111,8 @@ df = df.dropna().reset_index(drop=True)
 def curate_target(row, sym):
     if row[f"pca_drift_{sym}"] > DRIFT_TH:
         if row[f"future_ret_{sym}"] < -RET_TH:
-            return 1  # SELL
-        return 2      # HOLD
+            return 1
+        return 2
 
     if sym != BASE_SYMBOL and abs(row.get(f"pair_z_{sym}", 0)) > PAIR_Z_TH:
         return 1 if row[f"pair_z_{sym}"] > 0 else 0
@@ -141,13 +138,14 @@ def curate_target(row, sym):
     return 2
 
 # =========================
-# BUILD TRAINING SET
+# BUILD DATASET (TIME ORDERED)
 # =========================
 rows = []
 
 for sym_id, sym in enumerate(SYMBOLS):
     for _, r in df.iterrows():
         rows.append({
+            "timestamp": r["timestamp"],
             "symbol_id": sym_id,
             "target": curate_target(r, sym),
             "features": [
@@ -163,34 +161,51 @@ for sym_id, sym in enumerate(SYMBOLS):
             ]
         })
 
-train_df = pd.DataFrame(rows)
+train_df = pd.DataFrame(rows).sort_values("timestamp")
 
-X = np.vstack(train_df["features"].values)
-y = train_df["target"].values
-
-# =========================
-# ONE-HOT ENCODE TARGET
-# =========================
-y_onehot = to_categorical(y, num_classes=3)
+X = np.vstack(train_df["features"].values).astype(np.float32)
+y = train_df["target"].values.astype(np.int32)
 
 # =========================
-# SCALE FEATURES
+# TIME-BASED SPLIT
 # =========================
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
+split = int(len(X) * 0.8)
 
-np.save("scaler_mean.npy", scaler.mean_)
-np.save("scaler_scale.npy", scaler.scale_)
+X_train = X[:split]
+X_val   = X[split:]
 
-# =========================
-# TRAIN-VALIDATION SPLIT
-# =========================
-X_train, X_val, y_train, y_val = train_test_split(
-    X, y_onehot, test_size=0.2, random_state=42, stratify=y
-)
+y_train_cls = y[:split]
+y_val_cls   = y[split:]
+
+y_train = to_categorical(y_train_cls, num_classes=3)
+y_val   = to_categorical(y_val_cls, num_classes=3)
 
 # =========================
-# RANDOM SEARCH HYPERPARAMS
+# NUMPY STANDARD SCALER (TRAIN ONLY)
+# =========================
+mean = X_train.mean(axis=0)
+std = X_train.std(axis=0)
+std[std == 0] = 1.0
+
+X_train = (X_train - mean) / std
+X_val   = (X_val   - mean) / std
+
+np.save("scaler_mean.npy", mean)
+np.save("scaler_scale.npy", std)
+
+# =========================
+# CLASS IMBALANCE FIX
+# =========================
+class_counts = np.bincount(y_train_cls, minlength=3)
+class_weight = {
+    i: class_counts.max() / max(class_counts[i], 1)
+    for i in range(3)
+}
+
+print("Class weights:", class_weight)
+
+# =========================
+# RANDOM SEARCH
 # =========================
 search_space = {
     "lr": [0.001, 0.005, 0.01, 0.02],
@@ -208,7 +223,7 @@ for i in range(N_RANDOM_SEARCH):
     epochs = random.choice(search_space["epochs"])
 
     model = tf.keras.Sequential([
-        tf.keras.layers.Input(shape=(X.shape[1],)),
+        tf.keras.layers.Input(shape=(X_train.shape[1],)),
         tf.keras.layers.Dense(3, activation="softmax")
     ])
 
@@ -223,6 +238,7 @@ for i in range(N_RANDOM_SEARCH):
         validation_data=(X_val, y_val),
         batch_size=batch_size,
         epochs=epochs,
+        class_weight=class_weight,
         verbose=0
     )
 
@@ -244,5 +260,6 @@ tflite_model = converter.convert()
 with open(MODEL_OUT, "wb") as f:
     f.write(tflite_model)
 
-print("✅ Exported best model:", MODEL_OUT)
+print("Exported best model:", MODEL_OUT)
 print("Best hyperparameters:", best_hparams)
+
